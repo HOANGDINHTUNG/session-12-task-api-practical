@@ -21,10 +21,7 @@ services:
       timeout: 5s
       retries: 10
     networks:
-      task-network:
-        aliases:
-          - db
-          - task-db
+      - task-network
     logging:
       driver: "json-file"
       options:
