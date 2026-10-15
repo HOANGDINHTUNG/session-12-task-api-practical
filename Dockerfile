@@ -25,16 +25,16 @@ FROM eclipse-temurin:21-jre-alpine
 WORKDIR /app
 
 # Security: Create non-root user and group
-RUN addgroup -S daonbmgroup && adduser -S daonbm -G daonbmgroup
+RUN addgroup -S tungdeptraigroup && adduser -S tungdeptrai -G tungdeptraigroup
 
 # Copy built JAR from builder stage and assign ownership
-COPY --from=builder --chown=daonbm:daonbmgroup /app/build/libs/*.jar app.jar
+COPY --from=builder --chown=tungdeptrai:tungdeptraigroup /app/build/libs/*.jar app.jar
 
 # Switch to non-root user
-USER daonbm
+USER tungdeptrai
 
 # Expose application port
 EXPOSE 8083
 
 # Recommended JVM flags for containerized environment
-ENTRYPOINT ["java", "-Djava.security.egd=file:/dev/./urandom", "-jar", "app.jar"]
+ENTRYPOINT ["java", "-Djava.security.egd=file:/dev/./urandom", "-Djava.net.preferIPv4Stack=true", "-jar", "app.jar"]
