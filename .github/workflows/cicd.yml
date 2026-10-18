@@ -1,4 +1,4 @@
-name: CI/CD PIPELINE
+name: CI/CD
 
 on:
   push:
@@ -80,22 +80,13 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Check Deployment Secrets Status
-        run: |
-          echo "=== KIỂM TRA SECRETS TRÊN GITHUB ==="
-          echo "SERVER_HOST:     ${{ secrets.SERVER_HOST != '' && 'ĐÃ CÓ (OK)' || 'BỊ THIẾU/RỖNG (EMPTY)' }}"
-          echo "SERVER_USER:     ${{ secrets.SERVER_USER != '' && 'ĐÃ CÓ (OK)' || 'BỊ THIẾU/RỖNG (EMPTY)' }}"
-          echo "SERVER_PASSWORD: ${{ secrets.SERVER_PASSWORD != '' && 'ĐÃ CÓ (OK)' || 'BỊ THIẾU/RỖNG (EMPTY)' }}"
-          echo "SERVER_SSH_KEY:  ${{ secrets.SERVER_SSH_KEY != '' && 'ĐÃ CÓ (OK)' || 'BỊ THIẾU/RỖNG (EMPTY)' }}"
-          echo "======================================"
-
       - name: Copy deployment files to Server
         uses: appleboy/scp-action@v0.1.7
         with:
           host: ${{ secrets.SERVER_HOST }}
           username: ${{ secrets.SERVER_USER }}
-          password: ${{ secrets.SERVER_PASSWORD }}
-          port: ${{ secrets.SERVER_PORT || 22 }}
+          key: ${{ secrets.SERVER_SSH_KEY }}
+          port: ${{ secrets.SERVER_PORT }}
           source: "docker-compose.yml,src/main/resources/db/taskdb.sql"
           target: "app"
 
@@ -112,8 +103,8 @@ jobs:
         with:
           host: ${{ secrets.SERVER_HOST }}
           username: ${{ secrets.SERVER_USER }}
-          password: ${{ secrets.SERVER_PASSWORD || secrets.SERVER_PASS }}
-          port: ${{ secrets.SERVER_PORT || 22 }}
+          key: ${{ secrets.SERVER_SSH_KEY }}
+          port: ${{ secrets.SERVER_PORT }}
           envs: DB_NAME,DB_URL,DB_USER,DB_PASS,DB_PORT,DOCKER_USER,DOCKER_PAT
           script: |
             echo "Logging into Docker Hub..."
@@ -138,6 +129,6 @@ jobs:
             docker compose pull
 
             echo "Deploying application using Docker Compose..."
-            docker compose up -d --force-recreate --remove-orphans
+            docker compose up -d --remove-orphans
 
             echo "Deployment completed successfully."
